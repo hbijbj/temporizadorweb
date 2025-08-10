@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Temporizador Digital</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+
+  body {
+    background-color: black;
+    color: #00aaff;
+    font-family: 'Orbitron', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+  }
+  #timeDisplay {
+    font-size: 120px;
+    letter-spacing: 5px;
+  }
+  .controls {
+    margin-top: 20px;
+  }
+  button, input {
+    background-color: #00aaff;
+    border: none;
+    color: black;
+    font-size: 18px;
+    padding: 10px 20px;
+    margin: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-weight: bold;
+  }
+  button:hover, input:hover {
+    background-color: #0088cc;
+  }
+  input {
+    width: 100px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div>
+  <input type="number" id="minuteInput" min="1" placeholder="Minutos">
+</div>
+<div id="timeDisplay">00:00</div>
+<div class="controls">
+  <button id="startPauseBtn">Iniciar</button>
+  <button id="resetBtn">Reiniciar</button>
+</div>
+
+<script>
+let totalSeconds = 0;
+let timerInterval = null;
+let running = false;
+let alarm = new Audio("https://cdn.pixabay.com/audio/2022/03/19/audio_6492e3e218.mp3");
+alarm.loop = true; // para que suene repetidamente
+
+function updateDisplay() {
+  const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+  const seconds = String(totalSeconds % 60).padStart(2, '0');
+  document.getElementById('timeDisplay').textContent = `${minutes}:${seconds}`;
+}
+
+function startPause() {
+  if (!running) {
+    let inputMinutes = parseInt(document.getElementById('minuteInput').value);
+    if (isNaN(inputMinutes) || inputMinutes <= 0) {
+      alert("Por favor ingresa un número de minutos válido.");
+      return;
+    }
+    if (totalSeconds === 0) {
+      totalSeconds = inputMinutes * 60;
+      updateDisplay();
+    }
+    timerInterval = setInterval(() => {
+      if (totalSeconds > 0) {
+        totalSeconds--;
+        updateDisplay();
+      } else {
+        clearInterval(timerInterval);
+        running = false;
+        alarm.play(); // reproducir alarma
+      }
+    }, 1000);
+    document.getElementById('startPauseBtn').textContent = 'Pausar';
+    running = true;
+  } else {
+    clearInterval(timerInterval);
+    document.getElementById('startPauseBtn').textContent = 'Iniciar';
+    running = false;
+    alarm.pause();
+    alarm.currentTime = 0;
+  }
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  totalSeconds = 0;
+  running = false;
+  updateDisplay();
+  document.getElementById('startPauseBtn').textContent = 'Iniciar';
+  alarm.pause();
+  alarm.currentTime = 0;
+}
+
+document.getElementById('startPauseBtn').addEventListener('click', startPause);
+document.getElementById('resetBtn').addEventListener('click', resetTimer);
+
+updateDisplay();
+</script>
+</body>
+</html>
